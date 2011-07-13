@@ -17,7 +17,7 @@
 		$.prompt.currentPrefix = options.prefix;
 
 		var ie6		= ($.browser.msie && $.browser.version < 7);
-		var $body	= $(document.body);
+		var $parent	= options.parent;
 		var $window	= $(window);
 		
 		options.classes = $.trim(options.classes);
@@ -38,7 +38,7 @@
 		msgbox += options.prefix +'close">X</div><div id="'+ options.prefix +'states"></div>';
 		msgbox += '</div></div></div>';
 
-		var $jqib	= $(msgbox).appendTo($body);
+		var $jqib	= $(msgbox).appendTo($parent);
 		var $jqi	= $jqib.children('#'+ options.prefix);
 		var $jqif	= $jqib.children('#'+ options.prefix +'fade');
 
@@ -146,22 +146,20 @@
 				var fwd = !e.shiftKey && e.target == $inputels[$inputels.length-1];
 				var back = e.shiftKey && e.target == $inputels[0];
 				if (fwd || back) {
-				setTimeout(function(){ 
-					if (!$inputels)
-						return;
-					var el = $inputels[back===true ? $inputels.length-1 : 0];
+					setTimeout(function(){ 
+						if (!$inputels) return;
+						var el = $inputels[back===true ? $inputels.length-1 : 0];
 
-					if (el)
-						el.focus();						
-				},10);
-				return false;
+						if (el) el.focus();						
+					},10);
+					return false;
 				}
 			}
 		};
 		
 		var positionPrompt = function(){
 			$jqib.css({
-				position: (ie6) ? "absolute" : "fixed",
+				position: (ie6) ? "absolute" : options.position,
 				height: $window.height(),
 				width: "100%",
 				top: (ie6)? $window.scrollTop() : 0,
@@ -181,8 +179,9 @@
 			$jqi.css({
 				position: "absolute",
 				top: options.top,
-				left: "50%",
-				marginLeft: (($jqi.outerWidth()/2)*-1)
+				left: options.left,
+				width: options.width,
+				height: options.height
 			});
 		};
 
@@ -205,7 +204,7 @@
 			$jqi.remove();
 			//ie6, remove the scroll event
 			if(ie6) {
-				$body.unbind('scroll',ie6scroll);
+				$parent.unbind('scroll',ie6scroll);
 			}
 			$window.unbind('resize',positionPrompt);
 			$jqif.fadeOut(options.overlayspeed,function(){
@@ -262,12 +261,17 @@
 	 	},
 		opacity: 0.6,
 	 	zIndex: 999,
+		parent: $(document.body),
 	  	overlayspeed: 'slow',
 	   	promptspeed: 'fast',
    		show: 'fadeIn',
 	   	focus: 0,
 	   	useiframe: false,
 	 	top: "15%",
+		left: "50%",
+		width: "auto",
+		height: "auto",
+		position: "fixed",
 	  	persistent: true,
 	  	timeout: 0,
 	  	state: {
